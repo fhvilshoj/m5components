@@ -12,9 +12,17 @@ VIEW_SIZE = 4
 # TODO: Maybe just draw menu on top of everything else. Then one don't need everyone else to destroy their views.
 
 class ActionMenu:
-
+    """
+        This class can create a list view with four visible items at a time. It will
+        automatically add a back-button in the end of the list. 
+        Each list item is specified by a tuple (string, fn), which specifies the title
+        of the list item and the action, when the item is selected.
+        
+        The back_fn can, e.g., be used to restore the original view on the screen when
+        the menu is exited.
+    """
     # def __init__(self, title, options, back_fn, btnA, btnB, btnC):
-        # TODO don't know if the buttons will be accessible from in here? Probably not.
+    # TODO don't know if the buttons will be accessible from in here? Probably not.
     
     def __init__(self, title, options, back_fn):
         """

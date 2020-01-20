@@ -1,4 +1,9 @@
 """
+    
+    The config class allows the one to store and load configurations on the sd-card,
+    such that information is restored on reboot.
+
+
     This code is inspired by http://code.activestate.com/recipes/577887-a-simple-namespace-class/
 """
 
