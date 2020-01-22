@@ -1,4 +1,4 @@
-ifrom m5stack import *
+from m5stack import *
 from m5ui import *
 from uiflow import *
 
@@ -7,6 +7,7 @@ WHITE = 0xFFFFFF
 RED   = 0xff0000
 
 VIEW_SIZE = 4
+ITEM_OFFSET = 40
 
 # TODO: how to restore button actions after returning from list. 
 # TODO: Maybe just draw menu on top of everything else. Then one don't need everyone else to destroy their views.
@@ -37,7 +38,7 @@ class ActionMenu:
         self.active         = 0
         self.offset         = 0
 
-        btnA.wasPressed(self.go_up))
+        btnA.wasPressed(self.go_up)
         btnB.wasPressed(self.go_down)
         btnC.wasPressed(self.select_option)
 
@@ -47,20 +48,20 @@ class ActionMenu:
         # I think that we need to create elements in the order they should be shown,
         # i.e., all the background stuff should be constructed first
         self.item_rects = [
-            M5Rect(20, i*60 + 50, 280, 30, WHITE, WHITE)
-            for i in range(self.num_entries)
+            M5Rect(20, i*ITEM_OFFSET + 50, 280, 30, WHITE, WHITE)
+            for i in range(VIEW_SIZE)
         ]
 
         self.item_labels = [
-            M5TextBox(40, i*40 + 60, "Label %i" % i, lcd.FONT_Default, BLACK, rotate=0)
-            for i in range(self.num_entries)
+            M5TextBox(40, i*ITEM_OFFSET + 60, "Label %i" % i, lcd.FONT_Default, BLACK, rotate=0)
+            for i in range(VIEW_SIZE)
         ]
 
         # Button labels
         self.btn_labels = [
-            M5TextBox(57, 215, "Up", lcd.FONT_Default, WHITE, rotate=0)
-            M5TextBox(140, 215, "Down", lcd.FONT_Default, WHITE, rotate=0)
-            M5TextBox(226, 215, "Select", lcd.FONT_Default, WHITE, rotate=0)
+            M5TextBox(57, 215, "Up", lcd.FONT_Default, WHITE, rotate=0),
+            M5TextBox(140, 215, "Down", lcd.FONT_Default, WHITE, rotate=0),
+            M5TextBox(226, 215, "Select", lcd.FONT_Default, WHITE, rotate=0),
         ]
         
         self.update_list()
@@ -69,8 +70,8 @@ class ActionMenu:
     def update_list(self):
         to_show = self.options[self.offset:self.offset + VIEW_SIZE]
         num_active = len(to_show)
-
-        active_ids = self.active - self.offset
+        
+        active_idx = self.active - self.offset
         
         for i in range(VIEW_SIZE):
             rec     = self.item_rects[i]
@@ -78,13 +79,13 @@ class ActionMenu:
 
             rec.setBorderColor(WHITE)
 
-            if i+1 < num_active:        # Show these items
+            if i < num_active:        # Show these items
                 text, _ = to_show[i]
 
                 lab.setText(text)
 
                 # Set border of active item
-                if i == active_idx: rect.setBorderColor(RED)
+                if i == active_idx: rec.setBorderColor(RED)
 
                 rec.show()
                 lab.show()
@@ -98,6 +99,9 @@ class ActionMenu:
         # TODO: Destroy view
         # I am not sure if one should use `del` to delete rectangles and stuff or if
         # the program will then break
+        self.title.hide()
+        del self.title
+        
         for lab, rec in zip(self.item_labels, self.item_rects):
             lab.hide()
             rec.hide()
@@ -121,8 +125,7 @@ class ActionMenu:
         # Case 1: just need to move active one up ( active >self.offset )
         if act > off: self.active -= 1
 
-        # Case 2: need to move both active and offset ( active == offset )
-        else if off > 0: 
+        elif off > 0: # Case 2: need to move both active and offset ( active == offset )
             # Case a: active == offset > 0
             self.active -= 1
             self.offset -= 1
@@ -140,11 +143,11 @@ class ActionMenu:
         off = self.offset
         
         # Case 1: At bottom of list
-        if act == len(self.options):
+        if act == len(self.options)-1:
             self.active = 0
             self.offset = 0
         # Case 2: Not at bottom and space within the view
-        else if act < off + VIEW_SIZE - 2: 
+        elif act < off + VIEW_SIZE - 1: 
             self.active += 1
         # Case 3: Need to move both offset and active down
         else: 
@@ -156,5 +159,6 @@ class ActionMenu:
 
     def select_option(self):
         _, select_fn = self.options[self.active]
-        
+        select_fn()
+
 
